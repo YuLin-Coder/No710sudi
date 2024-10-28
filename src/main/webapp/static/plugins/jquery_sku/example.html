@@ -1,0 +1,360 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>jQuery商品SKU表格实例代码 - 站长素材</title>
+
+<script src="js/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/Convert_Pinyin.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/layer.js" type="text/javascript" charset="utf-8"></script>
+
+<link rel="stylesheet" type="text/css" href="css/layer.css"> 
+<link rel="stylesheet" type="text/css" href="css/layui.css"> 
+
+<style>
+	#sku-wrap, #sku-value-wrap{
+		display: flex;
+		align-items: start;
+		float: left;
+	}
+	#sku-wrap input,#sku-value-wrap input{
+		background: transparent;
+		width: 60px;
+		text-align: center;
+		border: 1px solid #E6E6E6;
+		margin-right: 20px;
+		border-radius: 2px;
+		padding: 10px 0;
+	}
+	#sku-wrap .sku-active{
+		border: 1px solid #1F9FFF;
+		color: #1F9FFF;
+	}
+	#sku-value-wrap input{
+		/*display: none;*/
+	}
+	#my-table{
+		display: none;
+		margin-left: 94px;
+	}
+	#my-table input{
+		border: 0;
+	}
+	#my-table td{
+		white-space: nowrap;
+	}
+	.layui-form-item{
+		width: 100%;
+	}
+	.delete-icon{
+		display: inline-block;
+		width: 12px;
+		height: 1px;
+		background: #C2C2C2;
+		transform: rotate(45deg);
+		-webkit-transform: rotate(45deg);
+		position: relative;
+		right: 33px;
+		top: 5px;
+		cursor: pointer;
+		z-index: 9999;
+	}
+	.delete-icon:after{
+		content: '';
+		display: block;
+		width: 12px;
+		height: 1px;
+		background: #C2C2C2;
+		transform: rotate(-90deg);
+		-webkit-transform: rotate(-90deg);
+		cursor: pointer;
+		position: relative;
+		z-index: 9999;
+	}
+</style>
+
+</head>
+<body>
+
+<div id="from" class="layui-form"  style="padding: 50px;">
+	<div class="layui-form-item" style="display: flex;">
+		<label class="layui-form-label" style="min-width: 80px;">规格</label>
+		<div id="sku-wrap"></div>
+		<div class="layui-input-inline" id="skuModel" style="display: none;border: 1px solid #E6E6E6;padding: 20px;margin-right: 0;min-width: 190px;">
+			<input type="text" name="skuName" id="skuName"  class="layui-input" placeholder="请输入规格名" style="margin-bottom: 20px;" autocomplete="off">
+			<button class="layui-btn layui-btn-normal" id="skuConfirm">确认</button>
+			<button class="layui-btn layui-btn-danger" id="skuCancel">取消</button>
+		</div>
+		<div class="layui-input-inline" style="width: 64px;">
+			<button class="layui-btn" id="skuAdd">添加</button>
+		</div>
+	</div>
+	<div class="layui-form-item" style="clear: none;float: left">
+		<label class="layui-form-label">规格值</label>
+		<div id="sku-value-wrap"></div>
+		<div class="layui-input-inline" id="skuValueModel" style="display: none;border: 1px solid #E6E6E6;padding: 20px;margin-right: 0;min-width: 190px;">
+			<input type="text" name="skuValueName" id="skuValueName"  class="layui-input" placeholder="请输入规格值" style="margin-bottom: 20px;" autocomplete="off">
+			<button class="layui-btn layui-btn-normal" id="skuValueConfirm">确认</button>
+			<button class="layui-btn layui-btn-danger" id="skuValueCancel">取消</button>
+		</div>
+		<div class="layui-input-inline" style="width: 64px;">
+			<button class="layui-btn" id="skuValueAdd">添加</button>
+		</div>
+	</div>
+	<div class="layui-form-item" style="clear: none;float: left">
+		<div class="layui-card-body" id="my-table">
+			<table class="layui-table">
+				<thead>
+				<tr id="th">
+				</tr>
+				</thead>
+				<tbody id="tbody">
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#sku-wrap').on('click', '.delete-icon', function (e) {
+			console.log('delete-icon');
+			event.stopPropagation();    //  阻止事件冒泡
+			var skuName = $(this).prev().val();
+			var fullName = pinyin.getFullChars(skuName);
+			var objs = document.getElementsByName(fullName);
+			console.log(objs);
+			for(var i = 0;i<=objs.length;i++){
+				objs[0].nextSibling.remove();
+				objs[0].remove();
+				console.log(i)
+			}
+			$(this).prev().remove();
+			$(this).remove();
+
+			event.stopPropagation();    //  阻止事件冒泡
+			combination();
+		});
+		$('#sku-value-wrap').on('click', '.delete-icon', function (e) {
+			$(this).prev().remove();
+			$(this).remove();
+
+			event.stopPropagation();    //  阻止事件冒泡
+			combination();
+		});
+	});
+
+	var firstTime = false;
+	// 添加规格按钮
+	$('#skuAdd').click(function () {
+		var skeLen = $('#sku-wrap').children().length;
+		if(skeLen==0){
+			firstTime = true;
+		}else {
+			firstTime = false;
+		}
+		$(this).hide();
+		$('#skuModel').show();
+	});
+	//  取消添加规格按钮
+	$('#skuCancel').click(function () {
+		$('#skuName').val('');
+		$('#skuModel').hide();
+		$('#skuAdd').show();
+	});
+
+	//  添加规格确认按钮
+	var fullName = '';
+	$('#skuConfirm').click(function () {
+		var skuName = $('#skuName').val();
+		if(skuName == ''){
+			layer.msg('请输入规格名');
+			return;
+		}
+		//获取全写拼音（调用js中方法）
+		fullName = pinyin.getFullChars(skuName);
+		//  判断规格是否已存在
+		if(ifSkuExit(fullName)){
+			layer.msg('此规格已存在！');
+			return;
+		}
+		if(firstTime){
+			$('#sku-wrap').append('<input type="button" class="sku sku-choose '+fullName+' " value="'+skuName+'"><span class="delete-icon"></span>');
+		}else{
+			$('#sku-wrap').append('<input type="button" class="sku '+fullName+' " value="'+skuName+'"><span class="delete-icon"></span>');
+		}
+		$('#skuName').val('');
+		$('#skuModel').hide();
+		$('#skuAdd').show();
+	});
+
+	//  切换sku
+	$(document).on('click', '.sku', function(){
+		console.log('sku');
+		event.stopPropagation();    //  阻止事件冒泡
+		$('.sku-value').hide();
+		$('#sku-value-wrap .delete-icon').hide();
+		if($(this).hasClass('sku-active')){
+			$(this).removeClass('sku-active');
+		}else {
+			var obj = $('.sku-active');
+			if (obj.length==2){
+				layer.msg('只能选择两种规格');
+				return;
+			}
+			$(this).addClass('sku-active');
+		}
+		$(this).addClass('sku-choose').siblings().removeClass('sku-choose');
+		var skuName = $(this).val();
+		fullName = pinyin.getFullChars(skuName);
+		console.log(fullName);
+		var objs = document.getElementsByName(fullName);
+		for(var i =0;i<objs.length;i++){
+			objs[i].style.display="block";
+			objs[i].nextSibling.style.display="block";
+		}
+		combination();
+	});
+
+
+	// 添加规格值按钮
+	$('#skuValueAdd').click(function () {
+		var skeLen = $('#sku-wrap').children().length;
+		if(skeLen==0){
+			layer.msg('请添加规格');
+			return;
+		}
+		var skeLen = $('#sku-wrap .sku-active').length;
+		if(skeLen==0){
+			layer.msg('请选择规格');
+			return;
+		}
+		$(this).hide();
+		$('#skuValueModel').show();
+	});
+	//  取消添加规格值按钮
+	$('#skuValueCancel').click(function () {
+		$('#skuValueName').val('');
+		$('#skuValueModel').hide();
+		$('#skuValueAdd').show();
+	});
+
+	//  添加规格值确认按钮
+	$('#skuValueConfirm').click(function () {
+		var skuName = $('.sku-choose').val();
+		fullName = pinyin.getFullChars(skuName);
+		var skuValueName = $('#skuValueName').val();
+		if(skuValueName == ''){
+			layer.msg('请输入规格名');
+			return;
+		}
+		//获取全写拼音（调用js中方法）
+		var fullValueName = pinyin.getFullChars(skuValueName);
+		//  判断规格值是否已存在
+		if(ifSkuExit(fullValueName)){
+			layer.msg('此规格已存在！');
+			return;
+		}
+		$('#sku-value-wrap').append('<input type="text" class="sku-value '+fullValueName+'" name="'+fullName+'" value="'+skuValueName+'" readonly><span class="delete-icon"></span>');
+		$('#skuValueName').val('');
+		$('#skuValueModel').hide();
+		$('#skuValueAdd').show();
+		combination();
+		$('#my-table').show();
+		combination();
+	});
+
+
+	function ifSkuExit(name){
+		var len = document.getElementsByClassName(name).length;
+		if(len==0){
+			return false;
+		}else {
+			return true;
+		}
+	}
+
+	// 组合数组
+	function combination () {
+		$('#tbody').html('');
+		$('#th').html('');
+		var arr = [];
+		var array = [];
+
+		var skuObjs = document.getElementsByClassName('sku-active');
+		for (var i = 0;i<skuObjs.length;i++){
+			var sku = skuObjs[i].value;
+			var py = pinyin.getFullChars(sku);
+			arr[i] = [];
+			var skuValueObjs = document.getElementsByName(py);
+			for(var j =0;j<skuValueObjs.length;j++){
+				array[j] = [];
+				array[j] = skuValueObjs[j].value;
+				arr[i].push(array[j]);
+			}
+
+
+		}
+		generateGroup(arr);
+
+	}
+
+
+
+	// 循环组合
+	function generateGroup(arr) {
+		var tablehtml = '';
+		var skuObjs = document.getElementsByClassName('sku-active');
+		for (var i = 0;i<skuObjs.length;i++){
+			// var sku = skuObjs[i].value;
+			// $('#th').append('<th>'+sku+'</th>');
+			tablehtml += '<th>'+skuObjs[i].value+'</th>';
+		}
+		tablehtml += '<th>价格</th><th>库存</th>';
+		$('#th').html(tablehtml);
+			// $('#th').append('<th>价格</th><th>库存</th>');
+		//初始化结果为第一个数组
+		var result= arr[0];
+		//从下标1开始遍历二维数组
+		for(var i=1;i<arr.length;i++){
+			//使用临时遍历替代结果数组长度(这样做是为了避免下面的循环陷入死循环)
+			var size= result.length;
+			//根据结果数组的长度进行循环次数,这个数组有多少个成员就要和下一个数组进行组合多少次
+			for(var j=0;j<size;j++){
+				//遍历要进行组合的数组
+				for(var k=0;k<arr[i].length;k++){
+					//把组合的字符串放入到结果数组最后一个成员中
+					//这里使用下标0是因为当这个下标0组合完毕之后就没有用了，在下面我们要移除掉这个成员
+					result.push(result[0]+","+arr[i][k]);
+					// $('#tbody').append('<tr><td>'+result[0]+'</td><td>'+arr[i][k]+'</td><td><input/> </td></tr>')
+				}
+				//当第一个成员组合完毕，删除这第一个成员
+				result.shift();
+			}
+		}
+		//打印结果
+		console.log(result);
+		if(typeof(result)!="undefined"){
+			console.log(result);
+			for(var i=0;i<result.length;i++){
+				var html = '';
+				html += '<tr>';
+				var arr = result[i].split(',');
+				for (var j=0;j<arr.length;j++){
+					html += '<td>'+arr[j]+'</td>'
+				}
+				html += '<td><input/></td><td><input/></td></tr>';
+				$('#my-table').show();
+				$("#tbody").append(html);
+			}
+		}else {
+			$('#my-table').hide();
+		}
+	}
+
+	// generateGroup([["红色","蓝色"],["X","XL"],["10m","20m"],["8g","16g"]]);
+
+</script>
+	
+</body>
+</html>

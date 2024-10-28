@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.AddressMapper">
+
+    <!-- 查找该角色的所有地址信息 -->
+    <select id="findAddressListByUserId" resultType="edu.jmu.sudi.entity.AddressEntity">
+        select * from sudi_address where userId=#{userId}
+    </select>
+
+    <!-- 添加地址 -->
+    <insert id="addAddress">
+        insert into sudi_address(userId, defaulted, address)
+        values (#{userId}, #{defaulted}, #{address})
+    </insert>
+
+    <!-- 查找该用户为首选的地址 -->
+    <select id="selectDefaultedAddressByUserId" resultType="edu.jmu.sudi.entity.AddressEntity">
+        select * from sudi_address where defaulted=1 and userId=#{userId}
+    </select>
+
+    <!-- 修改地址为非首选 -->
+    <update id="modifyAddressUndefaulted">
+        update sudi_address set defaulted=0 where addressId=#{addressId}
+    </update>
+
+    <!-- 修改地址 -->
+    <update id="modifyAddress">
+        update sudi_address
+        <set>
+            <if test="defaulted!=null"> defaulted=#{defaulted}, </if>
+            <if test="address!=null and address!=''"> address=#{address}, </if>
+        </set>
+        where addressId=#{addressId}
+    </update>
+
+    <!-- 删除地址 -->
+    <delete id="deleteAddress">
+        delete from sudi_address where addressId=#{addressId}
+    </delete>
+
+    <!-- 根据地址编号查询地址 -->
+    <select id="findAddressById" resultType="edu.jmu.sudi.entity.AddressEntity">
+        select * from sudi_address where addressId=#{addressId}
+    </select>
+</mapper>

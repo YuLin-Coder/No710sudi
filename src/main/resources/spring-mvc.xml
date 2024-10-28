@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+                           http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+">
+    <!--1. 开启组件扫描controller包-->
+    <context:component-scan base-package="edu.jmu.sudi.controller"/>
+
+    <!--2. 开启mvc注解驱动-->
+    <mvc:annotation-driven/>
+
+    <!--3. 配置视图解析器-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--4. 开放静态资源访问权限-->
+    <mvc:default-servlet-handler/>
+
+    <!--5. 配置文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="50000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <!--6. 配置控制器适配器-->
+    <bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean id="messageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                    <property name = "supportedMediaTypes">
+                        <list>
+                            <value>application/json;charset=utf-8</value>
+                            <value>text/plain;charset=utf-8</value>
+                            <value>text/html;charset=utf-8</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!--7. 配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--对以/开头的所有资源进行拦截-->
+            <mvc:mapping path="/**"/>
+            <!--排除对admin登录界面跳转路径的拦截-->
+            <mvc:exclude-mapping path="/login.html"/>
+            <mvc:exclude-mapping path="/register.html"/>
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/register"/>
+            <mvc:exclude-mapping path="/user/checkUsername"/>
+            <mvc:exclude-mapping path="/static/**"/>
+            <!--注入拦截器-->
+            <bean id="loginInterceptor" class="edu.jmu.sudi.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>

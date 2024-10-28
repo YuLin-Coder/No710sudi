@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.FoodattrMapper">
+
+    <!-- 根据页面返回信息查找符合条件的菜品规格组集合 -->
+    <select id="findFoodattrListByPage" resultType="edu.jmu.sudi.entity.FoodattrEntity">
+        select * from sudi_foodattr
+        <where>
+            <if test="foodattrId!=null"> and foodattrId=#{foodattrId} </if>
+            <if test="foodattrName!=null and foodattrName!=''"> and foodattrName like concat('%', #{foodattrName}, '%') </if>
+        </where>
+    </select>
+
+    <!-- 添加菜品规格组 -->
+    <insert id="addFoodattr">
+        insert into sudi_foodattr (foodattrName) values (#{foodattrName})
+    </insert>
+
+    <!-- 修改菜品规格组 -->
+    <update id="modifyFoodattr">
+        update sudi_foodattr set foodattrName=#{foodattrName} where foodattrId=#{foodattrId}
+    </update>
+
+    <!-- 删除菜品规格组 -->
+    <delete id="deleteFoodattr">
+        delete from sudi_foodattr where foodattrId=#{foodattrId}
+    </delete>
+
+    <!-- 查询所有的菜品类别 -->
+    <select id="findAllFoodattr" resultType="edu.jmu.sudi.entity.FoodattrEntity">
+        select * from sudi_foodattr
+    </select>
+
+</mapper>

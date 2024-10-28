@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.MenuMapper">
+
+    <!-- 查询所有菜单列表 -->
+    <select id="findMenuList" resultType="edu.jmu.sudi.entity.MenuEntity">
+        select * from sudi_menu
+    </select>
+
+    <!-- 根据用户Id查询其菜单列表 -->
+    <select id="findMenuListByUserId" resultType="edu.jmu.sudi.entity.MenuEntity">
+        select distinct m.* from sudi_menu m
+        inner join sudi_role_menu rm on rm.menuId=m.id
+        inner join sudi_user_role ur on ur.roleId=rm.roleId
+        where ur.userId=#{userId}
+    </select>
+
+    <!-- 根绝页面条件查询菜单列表 -->
+    <select id="findMenuListByPage" resultType="edu.jmu.sudi.entity.MenuEntity" parameterType="edu.jmu.sudi.vo.MenuVo">
+        select * from sudi_menu
+        <where>
+            <if test="id!=null"> and id=#{id} or pid=#{id} </if>
+            <if test="title!=null and title!=''"> and title like concat('%', #{title}, '%') </if>
+        </where>
+        order by id
+    </select>
+
+    <!-- 新增菜单 -->
+    <insert id="addMenu">
+        insert into sudi_menu (<if test="pid!=null"> pid,</if> title, href, spread, icon)
+        values (<if test="pid!=null"> #{pid},</if> #{title}, #{href}, #{spread}, #{icon})
+    </insert>
+
+    <!-- 修改菜单 -->
+    <update id="modifyMenu">
+        update sudi_menu
+        <set>
+            <if test="pid!=null"> pid=#{pid}, </if>
+            <if test="pid==null"> pid=0, </if>
+            <if test="title!=null and title!=''"> title=#{title}, </if>
+            <if test="href!=null and href!=''"> href=#{href}, </if>
+            <if test="spread!=null"> spread=#{spread}, </if>
+            icon=#{icon},
+        </set>
+        where id=#{id}
+    </update>
+
+    <!-- 查询该角色拥有的菜单列表 -->
+    <select id="findMenuIdListByRoleId" resultType="edu.jmu.sudi.entity.MenuEntity">
+        select m.* from sudi_menu m
+        inner join sudi_role_menu rm on m.id=rm.menuId
+        where roleId=#{roleId}
+    </select>
+
+    <!-- 查询该菜单有多少用户在用 -->
+    <select id="countRoleByMenuId" resultType="java.lang.Integer">
+        select count(0) from sudi_role_menu where menuId=#{menuId}
+    </select>
+
+    <!-- 删除菜单 -->
+    <delete id="deleteMenu">
+        delete from sudi_menu where id=#{menuId}
+    </delete>
+</mapper>

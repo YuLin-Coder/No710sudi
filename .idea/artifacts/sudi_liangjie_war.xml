@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="sudi_liangjie:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>sudi_liangjie</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="sudi_liangjie.war">
+      <element id="artifact" artifact-name="sudi_liangjie:war exploded" />
+    </root>
+  </artifact>
+</component>

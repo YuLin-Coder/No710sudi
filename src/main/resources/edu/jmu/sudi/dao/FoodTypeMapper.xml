@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.FoodTypeMapper">
+
+    <!-- 根据页面返回信息查找符合条件的菜品类别集合 -->
+    <select id="findFoodTypeListByPage" resultType="edu.jmu.sudi.entity.FoodTypeEntity">
+        select * from sudi_foodtype
+        <where>
+            <if test="typeId!=null"> and typeId=#{typeId} </if>
+            <if test="typeName!=null and typeName!=''"> and typeName like concat('%', #{typeName}, '%') </if>
+            <if test="typeStatus!=null and typeStatus!=0"> and typeStatus=#{typeStatus} </if>
+        </where>
+    </select>
+
+    <!-- 添加菜品类别 -->
+    <insert id="addFoodtype">
+        insert into sudi_foodtype (typeName, typeDesc, lastModifyBy, lastModifyTime, typeStatus, typeImage)
+        values (#{typeName}, #{typeDesc}, #{lastModifyBy}, NOW(), 1, #{typeImage})
+    </insert>
+
+    <!-- 编辑菜品类别 -->
+    <update id="modifyFoodtype">
+        update sudi_foodtype
+        <set>
+            <if test="typeName!=null and typeName!=''"> typeName=#{typeName}, </if>
+            <if test="typeImage!=null and typeImage!=''"> typeImage=#{typeImage}, </if>
+            <if test="typeDesc!=null and typeDesc!=''"> typeDesc=#{typeDesc}, </if>
+            lastModifyBy=#{lastModifyBy},
+            lastModifyTime=NOW(),
+        </set>
+        where typeId=#{typeId}
+    </update>
+
+    <!-- 菜品类别下架 -->
+    <update id="offShelfFoodtype">
+        update sudi_foodtype set typeStatus=2, lastModifyBy=#{username}, lastModifyTime=NOW()
+        where typeId=#{typeId}
+    </update>
+
+    <!-- 菜品类别恢复上架 -->
+    <update id="onShelfFoodtype">
+        update sudi_foodtype set typeStatus=1, lastModifyBy=#{username}, lastModifyTime=NOW()
+        where typeId=#{typeId}
+    </update>
+
+    <!-- 查询所有的菜品类别 -->
+    <select id="findAllFoodtype" resultType="edu.jmu.sudi.entity.FoodTypeEntity">
+        select * from sudi_foodtype
+    </select>
+    
+    <!-- 查找所有上架类别的所有上架菜品 -->
+    <select id="findAllFoodtypeOnShelf" resultType="edu.jmu.sudi.entity.FoodTypeEntity">
+        select * from sudi_foodtype where typeStatus=1;
+    </select>
+</mapper>

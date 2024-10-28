@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.FoodMapper">
+
+    <!-- 根据页面条件查询菜品SPU信息列表 -->
+    <select id="findFoodListByPage" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_view_foodSpu
+        <where>
+            <if test="foodId!=null"> and foodId=#{foodId} </if>
+            <if test="foodName!=null and foodName!=''"> and foodName like concat('%', #{foodName}, '%') </if>
+            <if test="typeId!=null"> and typeId=#{typeId} </if>
+            <if test="recommend!=null and recommend!=0"> and recommend=#{recommend} </if>
+            <if test="hotSale!=null and hotSale!=0"> and hotSale=#{hotSale} </if>
+            <if test="foodStatus!=null and foodStatus!=0"> and foodStatus=#{foodStatus} </if>
+        </where>
+    </select>
+
+    <!-- 添加菜品SPU信息 -->
+    <insert id="addFood">
+        <selectKey keyProperty="foodId" order="AFTER" resultType="java.lang.Long">
+            select last_insert_id()
+        </selectKey>
+        insert into sudi_food
+        (foodName, foodTypeId, foodIngredient, foodCookWay, foodVegon, foodDesc, foodImage, recommend, hotSale, lastModifyBy, lastModifyTime, dayStock)
+        values (#{foodName},#{typeId},#{foodIngredient}, #{foodCookWay},#{foodVegon},#{foodDesc},#{foodImage},#{recommend},#{hotSale},#{lastModifyBy},NOW(),#{dayStock})
+    </insert>
+
+    <!-- 修改菜品SPU信息 -->
+    <update id="modifyFood">
+        update sudi_food
+        <set>
+            <if test="foodName!=null and foodName!=''"> foodName=#{foodName}, </if>
+            <if test="foodVegon!=null and foodVegon!=''"> foodVegon=#{foodVegon}, </if>
+            <if test="typeId!=null"> foodtypeId=#{typeId}, </if>
+            <if test="foodCookWay!=null and foodCookWay!=''"> foodCookWay=#{foodCookWay}, </if>
+            <if test="foodIngredient!=null and foodIngredient!=''"> foodIngredient=#{foodIngredient}, </if>
+            <if test="foodImage!=null and foodImage!=''"> foodImage=#{foodImage}, </if>
+            <if test="recommend!=null"> recommend=#{recommend}, </if>
+            <if test="hotSale!=null"> hotSale=#{hotSale}, </if>
+            <if test="dayStock!=null"> dayStock=#{dayStock}, </if>
+            <if test="foodDesc!=null and foodDesc!=''"> foodDesc=#{foodDesc}, </if>
+            lastModifyBy=#{lastModifyBy},
+            lastModifyTime=NOW(),
+        </set>
+        where foodId=#{foodId}
+    </update>
+
+    <!-- 菜品上架 -->
+    <update id="foodOnShelf">
+        update sudi_food set foodStatus=1, lastModifyBy=#{username}, lastModifyTime=NOW() where foodId=#{foodId}
+    </update>
+
+    <!-- 删除菜品SPU -->
+    <delete id="deleteFood">
+        delete from sudi_food where foodId=#{foodId}
+    </delete>
+
+    <!-- 菜品下架 -->
+    <update id="foodOffShelf">
+        update sudi_food set foodStatus=2, lastModifyBy=#{username}, lastModifyTime=NOW() where foodId=#{foodId}
+    </update>
+
+    <!-- 根据菜品类别编号查找对应的菜品 -->
+    <select id="findFoodByTypeId" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_view_foodspu where typeId=#{typeId}
+    </select>
+    
+    <!-- 根据菜品SPU编号查找 -->
+    <select id="findFoodById" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_food where foodId=#{foodId};
+    </select>
+    
+    <!-- 根据菜品类别查找所有上架的菜品 -->
+    <select id="findOnshelfFoodByType" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_food where foodStatus=1 and foodTypeId=#{typeId};
+    </select>
+
+    <!-- 查询所有上架的推荐菜品 -->
+    <select id="findRecommendFoodOnShelf" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_view_foodspu where foodStatus=1 and recommend=1
+    </select>
+
+    <!-- 查询所有上架的热销菜品 -->
+    <select id="findHotSaleFoodOnShelf" resultType="edu.jmu.sudi.entity.FoodEntity">
+        select * from sudi_view_foodspu where foodStatus=1 and hotSale=1
+    </select>
+
+    <!-- 增加某个菜品SPU的销量 -->
+    <update id="addSaleCount">
+        update sudi_food set foodSaleCount=foodSaleCount+#{amount} where foodId=#{foodId}
+    </update>
+
+    <!-- 增加一条该菜品的评论数 -->
+    <update id="addCommentCountOne">
+        update sudi_food set commentCount=commentCount+1 where foodId=#{foodId}
+    </update>
+
+    <!-- 修改菜品的分数 -->
+    <update id="changeFoodScore">
+        update sudi_food set foodScore=#{foodScore} where foodId=#{foodId}
+    </update>
+
+    <!-- 该菜品浏览量+1 -->
+    <update id="addViewCountOne">
+        update sudi_food set foodViewCount=foodViewCount+1 where foodId=#{foodId}
+    </update>
+
+    <!-- 该菜品的差评数量+1 -->
+    <update id="addFaultCountOne">
+        update sudi_food set foodFaultCount=foodFaultCount+1 where foodId=#{foodId}
+    </update>
+</mapper>

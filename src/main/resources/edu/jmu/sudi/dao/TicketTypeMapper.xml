@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.TicketTypeMapper">
+    <!-- 根据页面条件查询优惠券类型集合 -->
+    <select id="findTicketTypeListByPage" resultType="edu.jmu.sudi.entity.TicketTypeEntity">
+        select * from sudi_tickettype
+        <where>
+            <if test="ticketTypeId!=null"> and ticketTypeId=#{ticketTypeId} </if>
+            <if test="ticketName!=null and ticketName!=''"> and ticketName like concat('%', #{ticketName}, '%') </if>
+            <if test="requirement!=null"> and requirement=#{requirement} </if>
+            <if test="cheap!=null"> and cheap=#{cheap} </if>
+            <if test="liveTime!=null"> and liveTime=#{liveTime} </if>
+        </where>
+    </select>
+
+    <!-- 新增优惠券类型 -->
+    <insert id="addTicketType">
+        insert into sudi_tickettype (ticketName, requirement, cheap, ticketNum, liveTime, lastModifyBy, lastModifyTime, needScore)
+        values (#{ticketName},#{requirement},#{cheap},#{ticketNum},#{liveTime},#{lastModifyBy},NOW(),#{needScore});
+    </insert>
+
+    <!-- 修改优惠券类型 -->
+    <update id="modifyTicketType">
+        update sudi_tickettype
+        <set>
+            <if test="ticketName!=null and ticketName!=''"> ticketName=#{ticketName}, </if>
+            <if test="requirement!=null"> requirement=#{requirement}, </if>
+            <if test="cheap!=null"> cheap=#{cheap}, </if>
+            <if test="liveTime!=null"> liveTime=#{liveTime}, </if>
+            <if test="ticketNum!=null"> ticketNum=#{ticketNum}, </if>
+            lastModifyBy=#{lastModifyBy},
+            lastModifyTime=NOW(),
+        </set>
+        where ticketTypeId=#{ticketTypeId}
+    </update>
+
+    <!-- 优惠券类型上架 -->
+    <update id="onShelf">
+        update sudi_tickettype set ticketTypeStatus=1, lastModifyBy=#{username}, lastModifyTime=NOW()
+        where ticketTypeId=#{ticketTypeId}
+    </update>
+
+    <!-- 优惠券类型下架 -->
+    <update id="offShelf">
+        update sudi_tickettype set ticketTypeStatus=2, lastModifyBy=#{username}, lastModifyTime=NOW()
+        where ticketTypeId=#{ticketTypeId}
+    </update>
+
+    <!-- 删除优惠券类型 -->
+    <delete id="deleteTicketType">
+        delete from sudi_ticketType where ticketTypeId=#{ticketTypeId}
+    </delete>
+    
+    <!-- 查询所有上架的优惠券类别 -->
+    <select id="findAllTicketOnShelf" resultType="edu.jmu.sudi.entity.TicketTypeEntity">
+        select * from sudi_tickettype where ticketTypeStatus=1;
+    </select>
+
+    <!-- 根据编号查询优惠券类别 -->
+    <select id="findTicketTypeById" resultType="edu.jmu.sudi.entity.TicketTypeEntity">
+        select * from sudi_tickettype where ticketTypeId=#{ticketTypeId};
+    </select>
+
+    <!-- 优惠券领取数+1 -->
+    <update id="addReceiveOne">
+        update sudi_tickettype set receive=receive+1 where ticketTypeId=#{ticketTypeId}
+    </update>
+</mapper>

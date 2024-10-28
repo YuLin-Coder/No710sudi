@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.RoleMapper">
+
+    <!-- 根据页面的条件查询角色列表 -->
+    <select id="findRoleListByPage" resultType="edu.jmu.sudi.entity.RoleEntity" parameterType="edu.jmu.sudi.vo.RoleVo">
+        select * from sudi_role
+        <where>
+            <if test="roleId!=null"> and roleId=#{roleId} </if>
+            <if test="roleName!=null and roleName!=''"> and roleName like concat('%', #{roleName}, '%') </if>
+        </where>
+    </select>
+
+    <!-- 添加角色 -->
+    <insert id="addRole">
+        insert into sudi_role (roleName, roleDesc, lastModifyBy, lastModifyTime)
+        values (#{roleName}, #{roleDesc}, #{lastModifyBy}, NOW())
+    </insert>
+
+    <!-- 编辑角色信息 -->
+    <update id="modifyRole">
+        update sudi_role
+        <set>
+            <if test="roleName!=null and roleName!=''"> roleName=#{roleName}, </if>
+            <if test="roleDesc!=null and roleDesc!=''"> roleDesc=#{roleDesc}, </if>
+            <if test="lastModifyBy!=null and lastModifyBy!=''"> lastModifyBy=#{lastModifyBy}, </if>
+            lastModifyTime=NOW(),
+        </set>
+        where roleId=#{roleId}
+    </update>
+
+    <!-- 查询所有角色列表，返回map集合 -->
+    <select id="findRoleListMap" resultType="map">
+        select * from sudi_role
+    </select>
+
+    <!-- 删除该角色的所有菜单权限 -->
+    <delete id="deleteAllMenuByRoleId">
+        delete from sudi_role_menu where roleId=#{roleId}
+    </delete>
+
+    <!-- 对角色进行菜单授权 -->
+    <insert id="grantMenu">
+        insert into sudi_role_menu (roleId, menuId)
+        values (#{roleId}, #{menuId})
+    </insert>
+
+    <!-- 查找该角色的用户数 -->
+    <select id="countUserByRoleId" resultType="java.lang.Integer">
+        select count(0) from sudi_user_role where roleId=#{roleId}
+    </select>
+
+    <!-- 删除角色 -->
+    <delete id="deleteRole">
+        delete from sudi_role where roleId=#{roleId}
+    </delete>
+
+    <!-- 根据角色编号查找角色 -->
+    <select id="findRoleByRoleId" resultType="edu.jmu.sudi.entity.RoleEntity">
+        select * from sudi_role where roleId=#{roleId}
+    </select>
+
+    <!-- 根据角色名查找角色编号 -->
+    <select id="findRoleIdByRoleName" resultType="java.lang.Long">
+        select roleId from sudi_role where roleName=#{roleName}
+    </select>
+
+    <!-- 删除某个用户与某个角色的关系 -->
+    <delete id="deleteRoleAndUser">
+        delete from sudi_user_role where userId=#{userId} and roleId=#{roleId}
+    </delete>
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.UserMapper">
+
+    <!-- 根据用户名查询用户信息 -->
+    <select id="findUserByUsername" resultType="edu.jmu.sudi.entity.UserEntity">
+        select * from sudi_user where username=#{username}
+    </select>
+
+    <!-- 设置用户登录成功后的信息记录 -->
+    <update id="setLoginSuccessInfo">
+        update sudi_user set lastLoginTime=NOW(), loginCount=loginCount+1 where userId=#{userId}
+    </update>
+
+    <!-- 设置用户退出登录后的信息记录 -->
+    <update id="setLogoutSuccessInfo">
+        update sudi_user set lastLogoutTime=NOW() where userId=#{userId}
+    </update>
+
+    <!-- 根据页面条件查询用户列表 -->
+    <select id="findUserListByPage" resultType="edu.jmu.sudi.entity.UserEntity" parameterType="edu.jmu.sudi.vo.UserVo">
+        select * from sudi_user
+        <where>
+            <if test="userId!=null"> and userId=#{userId} </if>
+            <if test="username!=null and username!=''"> and username like concat('%', #{username}, '%') </if>
+            <if test="phone!=null and phone!=''"> and phone like concat('%', #{phone}, '%') </if>
+            <if test="email!=null and email!=''"> and email like concat('%', #{email}, '%') </if>
+            <if test="gender!=null"> and gender=#{gender} </if>
+        </where>
+    </select>
+
+    <!-- 后台添加用户，返回添加的用户Id -->
+    <insert id="addUser" parameterType="edu.jmu.sudi.vo.UserVo">
+        <!-- 获取insert的用户ID -->
+        <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Long">
+            select last_insert_id()
+        </selectKey>
+        insert into sudi_user (username, password, phone, email, birthday, <if test="gender!=null">gender,</if> registerDate)
+        values(#{username}, #{password}, #{phone}, #{email}, #{birthday}, <if test="gender!=null">#{gender},</if> NOW());
+    </insert>
+
+    <!-- 后台修改用户信息 -->
+    <update id="modifyUserBackstage" parameterType="edu.jmu.sudi.vo.UserVo">
+        update sudi_user
+        <set>
+            <if test="username!=null and username!=''"> username=#{username}, </if>
+            <if test="phone!=null and phone!=''"> phone=#{phone}, </if>
+            <if test="birthday!=null"> birthday=#{birthday}, </if>
+            <if test="email!=null"> email=#{email}, </if>
+            <if test="gender!=null"> gender=#{gender}, </if>
+        </set>
+        where userId=#{userId}
+    </update>
+
+    <!-- 重置用户密码 -->
+    <update id="resetPassword">
+        update sudi_user set password=#{newPassword} where userId=#{userId}
+    </update>
+
+    <!-- 查找该用户所拥有的角色Id列表 -->
+    <select id="findRoleByUserId" resultType="java.lang.Long">
+        select roleId from sudi_user_role where userId=#{userId}
+    </select>
+
+    <!-- 删除该用户的所有角色关系 -->
+    <delete id="deleteUserAllRole">
+        delete from sudi_user_role where userId=#{userId}
+    </delete>
+
+    <!-- 添加该用户的角色关系 -->
+    <insert id="addUserAndRole">
+        insert into sudi_user_role (userId, roleId)
+        values (#{userId}, #{roleId});
+    </insert>
+
+    <!-- 删除该用户的角色关系 -->
+    <delete id="deleteUserAndRoleByUserId">
+        delete from sudi_user_role where userId=#{userId}
+    </delete>
+
+    <!-- 删除该用户信息 -->
+    <delete id="deleteUser">
+        delete from sudi_user where userId=#{userId}
+    </delete>
+
+    <!-- 校验用户注册输入的用户名是否存在 -->
+    <select id="checkUsername" resultType="java.lang.Integer">
+        select count(0) from sudi_user where username=#{username}
+    </select>
+
+    <!-- 用户注册 -->
+    <insert id="register">
+        <!-- 获取insert的用户ID -->
+        <selectKey keyProperty="userId" order="AFTER" resultType="java.lang.Long">
+            select last_insert_id()
+        </selectKey>
+        insert into sudi_user (username, password, phone, registerDate)
+        values(#{username}, #{password}, #{phone}, NOW())
+    </insert>
+
+    <!-- 查询某个用户的个人资料 -->
+    <select id="findUserByUserId" resultType="edu.jmu.sudi.entity.UserEntity">
+        select * from sudi_user where userId=#{userId}
+    </select>
+
+    <!-- 用户修改密码 -->
+    <update id="modifyPassword">
+        update sudi_user set password=#{newPassword} where userId=#{userId}
+    </update>
+
+    <!-- 修改用户积分 -->
+    <update id="modifyUserScore">
+        update sudi_user set score=score+#{change} where userId=#{userId}
+    </update>
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.FoodSkuMapper">
+
+    <!-- 新增菜品SKU信息 -->
+    <insert id="addFoodSku">
+        insert into sudi_foodsku (foodId, skuName)
+        values(#{foodId}, #{skuName})
+    </insert>
+
+    <!-- 查找某个菜品下的所有菜品SKU信息是否都已经完善 -->
+    <select id="findFoodSkuIsNull" resultType="java.lang.Integer">
+        select count(0) from sudi_foodsku where foodId=#{foodId} and skuPrice is null
+    </select>
+
+    <!-- 删除某个菜品的所有SKU信息 -->
+    <delete id="deleteFoodSkuByFoodId">
+        delete from sudi_foodsku where foodId=#{foodId}
+    </delete>
+
+    <!-- 根据页面的信息查询菜品SKU集合 -->
+    <select id="findFoodSkuListByPage" resultType="edu.jmu.sudi.entity.FoodSkuEntity">
+        select * from sudi_view_foodsku
+        <where>
+            <if test="skuId!=null"> and skuId=#{skuId} </if>
+            <if test="skuName!=null and skuName!=''"> and skuName like concat('%', #{skuName}, '%') </if>
+            <if test="foodName!=null and foodName!=''"> and foodName like concat('%', #{foodName}, '%') </if>
+            <if test="typeId!=null and typeId!=''"> and typeId=#{typeId} </if>
+            <if test="skuPrice!=null and skuPrice!=''"> and skuPrice=#{skuPrice} </if>
+            <if test="skuStock!=null"> and skuStock=#{skuStock} </if>
+        </where>
+    </select>
+
+    <!-- 新增菜品SKU信息 -->
+    <insert id="addFoodSkuBySkuManage">
+        insert into sudi_foodsku(foodId, skuName, skuPrice<if test="skuStock!=null and skuStock!=''">, skuStock</if>)
+        values (#{foodId}, #{skuName}, #{skuPrice}<if test="skuStock!=null and skuStock!=''">, #{skuStock}</if>)
+    </insert>
+
+    <!-- 修改菜品SKU信息 -->
+    <update id="modifyFoodSku">
+        update sudi_foodsku
+        <set>
+            <if test="skuPrice!=null"> skuPrice=#{skuPrice}, </if>
+            <if test="skuStock!=null"> skuStock=#{skuStock}, </if>
+        </set>
+        where skuId=#{skuId}
+    </update>
+
+    <!-- 删除菜品SKU -->
+    <delete id="deleteFoodSku">
+        delete from sudi_foodsku where skuId=#{skuId}
+    </delete>
+
+    <!-- 根据菜品编号查询所有SKU信息 -->
+    <select id="findFoodSkuListByFoodId" resultType="edu.jmu.sudi.entity.FoodSkuEntity">
+        select * from sudi_view_foodsku where foodId=#{foodId};
+    </select>
+
+    <!-- 根据skuId查找菜品spu -->
+    <select id="findFoodSkuBySkuId" resultType="edu.jmu.sudi.entity.FoodSkuEntity">
+        select * from sudi_view_foodsku where skuId=#{skuId}
+    </select>
+
+    <!-- 增加某个菜品的SKU销量 -->
+    <update id="addSkuSale">
+        update sudi_foodsku set skuSale=skuSale+#{skuSale} where skuId=#{skuId}
+    </update>
+</mapper>

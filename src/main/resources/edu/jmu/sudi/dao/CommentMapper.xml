@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.CommentMapper">
+
+    <!-- 用户发表评论 -->
+    <insert id="addComment">
+        insert into sudi_comment(orderDetailId, userId, commentScore, commentContent, commentTime)
+        values (#{orderDetailId}, #{userId}, #{commentScore}, #{commentContent}, NOW())
+    </insert>
+
+    <!-- 查询该菜品下的所有评论 -->
+    <select id="findByFood" resultType="edu.jmu.sudi.entity.CommentEntity">
+        select * from sudi_view_comment where foodId=#{foodId}
+    </select>
+
+    <!-- 查询该用户的所有评论 -->
+    <select id="findByUser" resultType="edu.jmu.sudi.entity.CommentEntity">
+        select * from sudi_view_comment where userId=#{userId}
+    </select>
+
+</mapper>

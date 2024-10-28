@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.OrderDetailMapper">
+
+    <!-- 生成订单细则 -->
+    <insert id="generateOrderDetail">
+        insert into sudi_orderdetail(orderId, skuId, amount, itemPrice, comment)
+        values (#{orderId}, #{skuId}, #{amount}, #{itemPrice}, 2)
+    </insert>
+
+    <!-- 根据订单编号查询订单细则列表 -->
+    <select id="findOrderDetailByOrderId" resultType="edu.jmu.sudi.entity.OrderDetailEntity">
+        select * from sudi_view_orderdetail where orderId=#{orderId}
+    </select>
+
+    <!-- 根据订单细则编号查找订单细则 -->
+    <select id="findOrderDetailById" resultType="edu.jmu.sudi.entity.OrderDetailEntity">
+        select * from sudi_view_orderdetail where orderdetailId=#{orderDetailId}
+    </select>
+
+    <!-- 修改订单细则为已评论 -->
+    <update id="commented">
+        update sudi_orderdetail set comment=1 where orderDetailId=#{orderDetailId}
+    </update>
+
+
+</mapper>

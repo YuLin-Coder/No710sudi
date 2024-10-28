@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.OrderMapper">
+
+    <!-- 生成订单 -->
+    <insert id="generateOrder">
+        insert into sudi_order(orderId, userId, address, realName, phone, ticketId, <if test="cheap!=null">cheap,</if> orderTime, orderStatus)
+        VALUES (#{orderId},#{userId},#{address},#{realName},#{phone},#{ticketId},<if test="cheap!=null">#{cheap},</if> NOW(),1)
+    </insert>
+    
+    <!-- 设置订单总计信息 -->
+    <update id="setTotalInfo">
+        update sudi_order set totalCount=#{totalCount}, totalPrice=#{totalPrice}, actualPrice=#{totalPrice}-cheap
+        where orderId=#{orderId}
+    </update>
+
+    <!-- 查找当前登录用户的所有订单，顺便给个排序 -->
+    <select id="findOrderListByUserId" resultType="edu.jmu.sudi.entity.OrderEntity">
+        select * from sudi_order where userId=#{userId} order by orderTime desc
+    </select>
+
+    <!-- 查询所有出餐中的订单，时间升序 -->
+    <select id="findAllCookingOrder" resultType="edu.jmu.sudi.entity.OrderEntity">
+        select * from sudi_order where orderStatus=1 order by orderTime
+    </select>
+
+    <!-- 订单封装配送员信息并且修改订单状态 -->
+    <update id="allocationOrder">
+        update sudi_order set deliverId=#{deliverId}, deliverName=#{deliverName}, deliverPhone=#{deliverPhone}, orderStatus=2
+        where orderId=#{orderId}
+    </update>
+
+    <!-- 查询当前配送员的待配送订单 -->
+    <select id="findOrderDeliverList" resultType="edu.jmu.sudi.entity.OrderEntity">
+        select * from sudi_order where deliverId=#{deliverId} and orderStatus=2 order by orderTime
+    </select>
+
+    <!-- 订单结单 -->
+    <update id="finishOrder">
+        update sudi_order set orderStatus=3, finishTime=NOW() where orderId=#{orderId}
+    </update>
+
+    <!-- 配送员取消订单配送，回退出餐中状态 -->
+    <update id="cancelDeliver">
+        update sudi_order set orderStatus=1, deliverId=null, deliverName=null, deliverPhone=null
+        where orderId=#{orderId}
+    </update>
+
+    <!-- 取消订单 -->
+    <update id="cancelOrder">
+        update sudi_order set orderStatus=5 where orderId=#{orderId}
+    </update>
+
+    <!-- 查询某个配送员的所有配送记录 -->
+    <select id="findAllOrderByDeliverId" resultType="edu.jmu.sudi.entity.OrderEntity">
+        select * from sudi_order where deliverId=#{deliverId} order by orderTime
+    </select>
+
+    <!-- 根据订单编号查询订单 -->
+    <select id="findOrderById" resultType="edu.jmu.sudi.entity.OrderEntity">
+        select * from sudi_order where orderId=#{orderId}
+    </select>
+
+    <!-- 修改订单为已投诉 -->
+    <update id="complainted">
+        update sudi_order set complaint=1 where orderId=#{orderId}
+    </update>
+
+    <!-- 查询当日某菜品的订货量 -->
+    <select id="findTodaySale" resultType="java.lang.Integer">
+        select sum(amount) from sudi_view_food_order
+        where to_days(orderTime) = to_days(now()) and foodId=#{foodId}
+    </select>
+
+</mapper>

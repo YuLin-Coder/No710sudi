@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.DeliverMapper">
+
+    <!-- 根据用户ID查找配送员 -->
+    <select id="findDeliverByUserId" resultType="java.lang.Integer">
+        select count(0) from sudi_deliver where userId=#{userId}
+    </select>
+
+    <!-- 将用户设置为配送员 -->
+    <insert id="addDeliver">
+        insert into sudi_deliver (deliverId, userId, joinDate, imageUrl)
+        values (#{deliverId}, #{userId}, NOW(), 'deliver/defaultImage/defaultImage.png')
+    </insert>
+
+    <!-- 将用户设置为配送员,传递更多的信息 -->
+    <insert id="addDeliverMoreInfo" parameterType="edu.jmu.sudi.vo.DeliverVo">
+        insert into sudi_deliver (deliverId, userId, realName, imageUrl, joinDate, remark)
+        values (#{deliverId}, #{userId}, #{realName}, #{imageUrl}, #{joinDate}, #{remark})
+    </insert>
+
+    <!-- 根据页面的条件查询配送员列表 -->
+    <select id="findDeliverListByPage" resultType="edu.jmu.sudi.entity.DeliverEntity">
+        select * from sudi_view_deliver
+        <where>
+            <if test="deliverId!=null and deliverId!=''"> and deliverId like concat('%', #{deliverId}, '%') </if>
+            <if test="username!=null and username!=''"> and username like concat('%', #{username}, '%') </if>
+            <if test="realName!=null and realName!=''"> and realName like concat('%', #{realName}, '%') </if>
+            <if test="phone!=null and phone!=''"> and phone like concat('%', #{phone}, '%') </if>
+            <if test="joinDate!=null"> and joinDate like concat('%', #{joinDate}, '%') </if>
+        </where>
+    </select>
+
+    <!-- 查找不是配送员的用户 -->
+    <select id="findUserListNotDeliver" resultType="edu.jmu.sudi.entity.UserEntity">
+        select * from sudi_user u
+        where u.userId not in
+            (select userId from sudi_deliver)
+    </select>
+
+    <!-- 修改配送员 -->
+    <update id="modifyDeliver">
+        update sudi_deliver
+        <set>
+            <if test="realName!=null and realName!=''"> realName=#{realName}, </if>
+            <if test="imageUrl!=null and imageUrl!=''"> imageUrl=#{imageUrl}, </if>
+            <if test="remark!=null and remark!=''"> remark=#{remark}, </if>
+        </set>
+        where deliverId=#{deliverId}
+    </update>
+
+    <!-- 配送员离职 -->
+    <update id="leaveDeliver">
+        update sudi_deliver set leaveDate=NOW() where deliverId=#{deliverId}
+    </update>
+
+    <!-- 配送员复职 -->
+    <update id="reJoinDeliver">
+        update sudi_deliver set leaveDate=null, joinDate=NOW() where deliverId=#{deliverId}
+    </update>
+
+    <!-- 查找最大接单数 -->
+    <select id="findMaxOrderCount" resultType="java.lang.Integer">
+        select max(orderCount) from sudi_deliver
+    </select>
+
+    <!-- 查找最大差评数 -->
+    <select id="findMaxFaultCount" resultType="java.lang.Integer">
+        select max(faultCount) from sudi_deliver
+    </select>
+
+    <!-- 查找最大结单数 -->
+    <select id="findMaxFinishCount" resultType="java.lang.Integer">
+        select max(finishCount) from sudi_deliver
+    </select>
+
+    <!-- 查询正式的配送员信息(未离职且已实名) -->
+    <select id="findFormalDeliver" resultType="edu.jmu.sudi.entity.DeliverEntity">
+        select * from sudi_view_deliver where leaveDate is null and realName is not null
+    </select>
+
+    <!-- 根据配送员编号查询配送员信息 -->
+    <select id="findDeliverById" resultType="edu.jmu.sudi.entity.DeliverEntity">
+        select * from sudi_view_deliver where deliverId=#{deliverId}
+    </select>
+
+    <!-- 该配送员的接单数+1 -->
+    <update id="addOneOrderCount">
+        update sudi_deliver set orderCount=orderCount+1 where deliverId=#{deliverId}
+    </update>
+
+    <!-- 该配送员的结单数+1 -->
+    <update id="addOneFinishCount">
+        update sudi_deliver set finishCount=finishCount+1 where userId=#{userId}
+    </update>
+
+    <!-- 根据用户ID查找配送员 -->
+    <select id="findDeliverByUser" resultType="edu.jmu.sudi.entity.DeliverEntity">
+        select * from sudi_view_deliver where userId=#{userId}
+    </select>
+
+    <!-- 该配送员增加一个差评记录 -->
+    <update id="addFaultCountOne">
+        update sudi_deliver set faultCount=faultCount+1 where deliverId=#{deliverId}
+    </update>
+
+</mapper>

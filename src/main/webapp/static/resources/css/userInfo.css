@@ -1,0 +1,49 @@
+.userinfo-img {
+    padding: 0 8px;
+    margin: 0 auto;
+}
+
+.userinfo-img img {
+    width: 286px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.userinfo-container {
+    font-size: 14px;
+    color: #666666;
+}
+
+.userinfo-item {
+    padding: 10px 0px;
+}
+
+.userinfo-field {
+    width: 100%;
+    padding: 10px 10px 0 10px;
+}
+
+.userinfo-area {
+    margin: 0 20px;
+    padding-top: 15px;
+}
+
+.userInfoCard {
+    position: relative;
+}
+
+#modifyUserInfo {
+    position: absolute;
+    top: -5px;
+    right: 14px;
+}
+
+.layui-table .layui-table-tbody th {
+    background-color: rgba(237,237,237,.3);
+}
+
+.userinfo-img a img:hover {
+    transition: all 0.5s;
+    transform:scale(1.03);
+    opacity: 1;
+}

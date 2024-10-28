@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.TicketMapper">
+
+    <!-- 添加优惠券的领取记录 -->
+    <insert id="addTicket">
+        insert into sudi_ticket (ticketTypeId, userId, startTime, endTime, ticketStatus)
+        values (#{ticketTypeId}, #{userId}, NOW(), ADDDATE(NOW(),#{liveTime}), 1)
+    </insert>
+
+    <!-- 根据页面信息查询优惠券领取记录 -->
+    <select id="findTicketListByPage" resultType="edu.jmu.sudi.entity.TicketEntity">
+        select * from sudi_view_ticket
+        <where>
+            <if test="ticketId!=null"> and ticketId=#{ticketId} </if>
+            <if test="ticketName!=null and ticketName!=''"> and ticketName like concat('%', #{ticketName}, '%') </if>
+            <if test="username!=null and username!=''"> and username like concat('%', #{username}, '%') </if>
+            <if test="startTime!=null and startTime!=''"> and startTime like concat('%', #{startTime}, '%') </if>
+            <if test="ticketStatus!=null and ticketStatus!=0"> and ticketStatus=#{ticketStatus} </if>
+        </where>
+    </select>
+
+    <!-- 将某张优惠券作废 -->
+    <update id="invalid">
+        update sudi_ticket set ticketStatus=4 where ticketId=#{ticketId}
+    </update>
+
+    <!-- 将某张优惠券作废 -->
+    <update id="restore">
+        update sudi_ticket set ticketStatus=1 where ticketId=#{ticketId}
+    </update>
+
+    <!-- 将某张优惠券积分返还 -->
+    <update id="returnScore">
+        update sudi_ticket set ticketStatus=5 where ticketId=#{ticketId}
+    </update>
+
+    <!-- 根据优惠券编号查询优惠券 -->
+    <select id="findTicketById" resultType="edu.jmu.sudi.entity.TicketEntity">
+        select * from sudi_view_ticket where ticketId=#{ticketId};
+    </select>
+
+    <!-- 查找所有过期的优惠券 -->
+    <select id="findTicketIdListOutTime" resultType="java.lang.Long">
+        select ticketId from sudi_ticket where endTime &lt; NOW() and ticketStatus=1
+    </select>
+
+    <!-- 将优惠券状态改为过期 -->
+    <update id="setOutTime">
+        update sudi_ticket set ticketStatus=3 where ticketId=#{ticketId}
+    </update>
+
+    <!-- 查询某个用户的优惠券记录 -->
+    <select id="findByUser" resultType="edu.jmu.sudi.entity.TicketEntity">
+        select * from sudi_view_ticket where userId=#{userId} order by ticketStatus
+    </select>
+    
+    <!-- 查询该用户未使用的优惠券 -->
+    <select id="findByUserUnuse" resultType="edu.jmu.sudi.entity.TicketEntity">
+        select * from sudi_view_ticket where userId=#{userId} and ticketStatus=1;
+    </select>
+
+    <!-- 将某张优惠券的状态设置为已使用 -->
+    <update id="ticketUsed">
+        update sudi_ticket set ticketStatus=2 where ticketId=#{ticketId}
+    </update>
+</mapper>

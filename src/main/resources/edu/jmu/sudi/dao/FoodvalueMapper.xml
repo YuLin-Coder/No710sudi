@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.FoodvalueMapper">
+
+    <!-- 查找该规格组下的规格数量 -->
+    <select id="findCountByFoodattrId" resultType="java.lang.Integer">
+        select count(0) from sudi_foodvalue where foodattrId=#{foodattrId}
+    </select>
+
+    <!-- 新增菜品的规格值 -->
+    <insert id="addFoodvalue">
+        insert into sudi_foodvalue(foodId, foodattrId, foodvalueName)
+        values(#{foodId}, #{foodattrId}, #{foodvalueName})
+    </insert>
+
+    <!-- 删除某个菜品的所有规格值 -->
+    <delete id="deleteFoodvalueByFoodId">
+        delete from sudi_foodvalue where foodId=#{foodId}
+    </delete>
+    
+    <!-- 根据菜品SPU编号查找规格组编号 -->
+    <select id="findFoodattrIdByFoodId" resultType="java.lang.Long">
+        select foodattrId from sudi_foodvalue where foodId=#{foodId} limit 1 ;
+    </select>
+
+    <!-- 删除某个菜品下的某一个规格 -->
+    <delete id="deleteFoodvalue">
+        delete from sudi_foodvalue where foodId=#{foodId} and foodvalueName=#{foodvalueName}
+    </delete>
+
+    <!-- 根据菜品编号返回菜品规格信息 -->
+    <select id="findFoodvalueListByFoodId" resultType="edu.jmu.sudi.entity.FoodvalueEntity">
+        select * from sudi_view_attr_value where foodId=#{foodId};
+    </select>
+</mapper>

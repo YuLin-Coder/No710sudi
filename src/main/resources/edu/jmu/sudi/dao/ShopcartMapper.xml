@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.jmu.sudi.dao.ShopcartMapper">
+    <!-- 添加菜品SKU到购物车 -->
+    <insert id="addShopcart">
+        insert into sudi_shopcart(skuId, userId, numCount)
+        values (#{skuId}, #{userId}, #{numCount})
+    </insert>
+
+    <!-- 查询用户的购物车中是否存在某个SKU菜品 -->
+    <select id="findShopcartRecord" resultType="edu.jmu.sudi.entity.ShopcartEntity">
+        select * from sudi_shopcart where userId=#{userId} and skuId=#{skuId};
+    </select>
+
+    <!-- 添加购物车中某个物品的数量 -->
+    <update id="addNumCount">
+        update sudi_shopcart set numCount=numCount+#{numCount} where shopcartId=#{shopcartId}
+    </update>
+
+    <!-- 查找该用户下的所有购物车信息 -->
+    <select id="findAllShopcartByUserId" resultType="edu.jmu.sudi.entity.ShopcartEntity">
+        select * from sudi_view_shopcart where userId=#{userId};
+    </select>
+
+    <!-- 该用户某个SKU菜品的数量+1 -->
+    <update id="addNumCountOne">
+        update sudi_shopcart set numCount=numCount+1 where shopcartId=#{shopcartId}
+    </update>
+
+    <!-- 该用户某个SKU菜品的数量-1 -->
+    <update id="reduceNumCountOne">
+        update sudi_shopcart set numCount=numCount-1 where shopcartId=#{shopcartId}
+    </update>
+
+    <!-- 删除购物车的某一个条目 -->
+    <delete id="deleteShopcart">
+        delete from sudi_shopcart where shopcartId=#{shopcartId}
+    </delete>
+
+    <!-- 清空某个用户的购物车 -->
+    <delete id="clearShopcart">
+        delete from sudi_shopcart where userId=#{userId}
+    </delete>
+</mapper>
